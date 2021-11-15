@@ -1,13 +1,16 @@
-import { useContext, useEffect, useState } from "react"
-import { fetchTokenId, getBalance, getCurrentPrice, refillPunchcard } from "../contracts/contractAPI";
+import { useContext, useEffect, useState } from "react";
+import { fetchTokenId, getBalance, getCurrentPrice } from "../contracts/contractAPI";
 import { WalletContext } from "../context/WalletContext";
-import { defaultPunchcardAmount } from "../constants/contractConstants";
+import { PunchcardRefillBtn } from "./PunchcardRefillBtn";
+import { checkForPunchcard } from "../contracts/contractAPI";
+import { NeedPunchcard } from "./NeedPunchcard";
 
 export const PunchcardRefill = () => {
     const walletContext = useContext(WalletContext);
     const [currentBalance, setCurrentBalance] = useState(null);
     const [currentPrice, setCurrentPrice] = useState(null);
     const [tokenId, setTokenId] = useState(null);
+    const [hasPunchcard, setHasPunchcard] = useState(null);
 
     useEffect(() => {
         let mounted = true;
@@ -22,9 +25,19 @@ export const PunchcardRefill = () => {
     }, [tokenId]);
 
     useEffect(() => {
-        loadTokenId(walletContext.state.currentAccount);
-        loadCurrentPrice();
+      checkPunchcard(walletContext.state.currentAccount);
+      loadTokenId(walletContext.state.currentAccount);
+      loadCurrentPrice();
     }, [walletContext.state.currentAccount]);
+
+    const checkPunchcard = async (_address) => {
+      try {
+          const _result = await checkForPunchcard(_address);
+          setHasPunchcard(_result);
+      } catch (e) {
+          console.log("Unable to get balance");
+      }
+  }
 
     const loadCurrentPrice = async () => {
         const _currentPrice = await getCurrentPrice();
@@ -68,27 +81,14 @@ export const PunchcardRefill = () => {
                     <div className="flex-1 border-t-2 pb-4 border-gray-200" /></div>
                     <p className="mt-4 text-lg text-gray-600">Current wallet:</p>
                     <p className="text-lg text-gray-600">{walletContext.state.currentShortAccount}</p>
-                    <p className="mt-4 text-lg text-gray-600">You currently have {currentBalance} punches.</p>
+                    {hasPunchcard ? 
+                      <p className="mt-4 text-lg text-gray-600">You currently have {currentBalance} punches.</p> :
+                      <p className="mt-4 text-lg text-gray-600">No punchcard found for this wallet</p>
+                    }
                 </div>
               </div>
               <div className="py-8 px-6 text-center bg-gray-50 lg:flex-shrink-0 lg:flex lg:flex-col lg:justify-center lg:p-12">
-                <p className="text-lg leading-6 font-medium text-gray-900">Refill your punchcard*</p>
-                <div className="mt-4 flex items-center justify-center text-4xl font-extrabold text-gray-900">
-                    <span>{currentPrice / 1e18}</span>
-                    <span className="ml-3 text-xl font-medium text-gray-500">ETH</span>
-                </div>
-                <div className="mt-6">
-                    <div className="rounded-md shadow">
-                    <button
-                        onClick={() => refillPunchcard(defaultPunchcardAmount, currentPrice, tokenId)}
-                        className="flex items-center justify-center w-full px-4 py-3 border border-transparent text-2xl 
-                        font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900"
-                    >
-                        Refill
-                    </button>
-                    </div>
-                </div>
-                <p className="text-sm p-3">* Comes with {defaultPunchcardAmount} punches</p>
+                {hasPunchcard ? <PunchcardRefillBtn currentPrice={currentPrice} tokenId={tokenId} /> : <NeedPunchcard />}
               </div>
             </div>
           </div>
@@ -97,3 +97,4 @@ export const PunchcardRefill = () => {
     </div>
   )
 }
+

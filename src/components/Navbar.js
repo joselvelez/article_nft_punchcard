@@ -10,7 +10,7 @@ export const Navbar = () => {
     return (
         <div className="flex flex-row justify-between pt-3 px-3 pb-1">
             <div>
-                <a href="/" className="font-bold sm:text-sm md:text-xl text-gray-800">Article NFT Punchcard Concept</a>
+                <a href="/" className="font-bold sm:text-sm md:text-lg lg:text-2xl text-gray-800">~ WAGMI Daily ~</a>
             </div>
             <div>
                 <button
