@@ -1,7 +1,6 @@
 import { CheckCircleIcon } from '@heroicons/react/solid';
 import { useContext, useEffect, useState } from "react"
-import { getCurrentPrice, mintPunchcard } from "../contracts/contractAPI";
-import { checkForPunchcard } from "../contracts/contractAPI";
+import { getCurrentPrice, mintPunchcard, checkForPunchcard } from "../contracts/contractAPI";
 import { PunchcardMintBtn } from './PunchcardMintBtn';
 import { WalletContext } from '../context/WalletContext';
 import { PunchcardMinted } from './PunchcardMinted';

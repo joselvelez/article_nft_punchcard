@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { fetchArticle } from "../utils/fetchArticle";
+import { WalletContext } from '../context/WalletContext';
+import { useContext } from "react";
+import { checkAccessToArticle } from "../contracts/contractAPI";
+import { NoArticleAccess } from "./NoArticleAccess";
+import { ArticleContent } from "./ArticleContent";
 
 export const Article = () => {
+    const walletContext = useContext(WalletContext);
     const { articleId } = useParams();
+    const [hasAccess, setHasAccess] = useState(null);
     const [article, setArticle] = useState({
         id: null,
         title: null,
@@ -25,21 +32,24 @@ export const Article = () => {
         }
 
         loadArticle(_articleId);
-
     }, [articleId]);
+
+    useEffect(() => {
+        async function checkAccess(_address, _tokenId) {
+            try {
+                const _hasAccess = await checkAccessToArticle(_address, _tokenId);
+                setHasAccess(_hasAccess);
+            } catch (e) {
+                console.log("Unable to determine article access")
+            }
+        }
+
+        checkAccess(walletContext.state.currentAccount, articleId);
+    }, [walletContext.state.currentAccount, articleId]);
 
     return (
         <div>
-            <div className="sm:pt-1">
-                <h2 className="font-sans text-2xl font-semibold pb-2">{article.title}</h2>
-                <img src={article.image} className="h-64 sm:w-1/2 lg:w-full object-cover sm:float-left lg:float-none sm:mr-4" alt="article" />
-                <p className="font-sans text-sm leading-relaxed pb-2 px-4">
-                    {article.content}
-                </p>
-                <p className="font-sans text-sm leading-relaxed pb-2 px-4">
-                    {article.content}
-                </p>
-            </div>
+            {hasAccess ? <ArticleContent article={article} /> : <NoArticleAccess articleId={articleId} />}
         </div>
     )
 }

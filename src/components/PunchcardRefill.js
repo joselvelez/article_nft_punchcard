@@ -1,8 +1,7 @@
 import { useContext, useEffect, useState } from "react";
-import { fetchTokenId, getBalance, getCurrentPrice } from "../contracts/contractAPI";
+import { fetchTokenId, getBalance, getCurrentPrice, checkForPunchcard } from "../contracts/contractAPI";
 import { WalletContext } from "../context/WalletContext";
 import { PunchcardRefillBtn } from "./PunchcardRefillBtn";
-import { checkForPunchcard } from "../contracts/contractAPI";
 import { NeedPunchcard } from "./NeedPunchcard";
 
 export const PunchcardRefill = () => {

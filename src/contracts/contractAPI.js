@@ -64,6 +64,16 @@ export const fetchTokenId = async (_address) => {
     }
 }
 
+export const checkAccessToArticle = async (_address, _articleId) => {
+    try {
+        let _provider = getContractProvider();
+        let _hasArticleAccess = await _provider.accessToArticle(_address, _articleId);
+        return _hasArticleAccess;
+    } catch (e) {
+        console.log("Unable to check article access");
+    }
+}
+
 export const mintPunchcard = async (_qty, _price) => {
     try {
         let _signer = getContractSigner();
@@ -77,6 +87,15 @@ export const refillPunchcard = async (_qty, _price, _tokenId) => {
     try {
         let _signer = getContractSigner();
         await _signer.addRedemptions(_qty, _tokenId, {value: (_price * _qty)});
+    } catch (e) {
+        console.log("Unable to purchase a punchcard");
+    }
+}
+
+export const purchaseArticle = async (_articleId) => {
+    try {
+        let _signer = getContractSigner();
+        await _signer.assignAccessToArticle(_articleId);
     } catch (e) {
         console.log("Unable to purchase a punchcard");
     }
