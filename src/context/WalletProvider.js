@@ -1,6 +1,7 @@
 import { useReducer, useEffect } from "react";
 import { shortenAddress } from "../constants/contractConstants";
-import { GET_ACCOUNTS, GET_SHORT_ACCOUNTS, GET_CHAIN, WALLET_INSTALLED } from "./walletActions";
+import { configuredChain, networks } from "../constants/networks";
+import { GET_ACCOUNTS, GET_SHORT_ACCOUNTS, GET_CURENT_CHAIN, WALLET_INSTALLED, GET_CONFIGURED_CHAIN, GET_CURENT_NETWORK, GET_CONFIGURED_NETWORK } from "./walletActions";
 import { fetchAccounts, fetchChain } from "./walletAPI";
 import { WalletContext } from "./WalletContext";
 import { walletReducer } from "./walletReducer";
@@ -12,6 +13,9 @@ const WalletProvider = ({ children }) => {
         currentAccount: [],
         currentShortAccount: [],
         currentChain: null,
+        configuredChain: null,
+        currentNetwork: null,
+        configuredNetwork: null,
     }
     const [state, dispatch] = useReducer(walletReducer, initialState);
 
@@ -23,7 +27,7 @@ const WalletProvider = ({ children }) => {
     
         window.ethereum.on('chainChanged', (chainId) => {
             console.log(`Switching chains to ${chainId}`);
-            getChain();
+            getCurrentChain();
             window.location.reload();
         });
     }
@@ -31,7 +35,10 @@ const WalletProvider = ({ children }) => {
     useEffect(() => {
         walletInstalled();
         if (window.ethereum) {
-            getChain();
+            getCurrentChain();
+            getConfiguredChain();
+            getCurrentNetwork();
+            getConfiguredNetwork();
             getAccount();
             getShortAccount();
         }
@@ -95,18 +102,62 @@ const WalletProvider = ({ children }) => {
         }
     };
 
-    // dispatch method to retrieve the current network
-    const getChain = async () => {
+    // dispatch method to retrieve the current chain
+    const getCurrentChain = async () => {
         try {
             const _currentChain = await fetchChain();
             console.log(`Current chain: ${_currentChain}`);
 
             dispatch({
-                type: GET_CHAIN,
+                type: GET_CURENT_CHAIN,
                 payload: _currentChain,
             });
         } catch (e) {
             console.log("Unable to fetch network information", e);
+        }
+    };
+
+    // dispatch method to retrieve the configured chain
+    const getConfiguredChain = async () => {
+        try {
+            const _configuredChain = configuredChain;
+
+            dispatch({
+                type: GET_CONFIGURED_CHAIN,
+                payload: _configuredChain,
+            });
+        } catch (e) {
+            console.log("Unable to get configured chain information", e);
+        }
+    };
+
+    // dispatch method to retrieve the current network
+    const getCurrentNetwork = async () => {
+        try {
+            const _currentChain = await fetchChain();
+            const _currentNetwork = networks.find(i => i.hex === _currentChain)
+
+            dispatch({
+                type: GET_CURENT_NETWORK,
+                payload: _currentNetwork,
+            });
+        } catch (e) {
+            console.log("Unable to get current network information", e);
+        }
+    };
+
+    // dispatch method to retrieve the configured network
+    const getConfiguredNetwork = async () => {
+        try {
+            const _configuredChain = configuredChain;
+            const _configuredNetwork = networks.find(i => i.hex === _configuredChain)
+
+            dispatch({
+                type: GET_CONFIGURED_NETWORK,
+                payload: _configuredNetwork,
+            });
+        } catch (e) {
+            console.log("Unable to get configured network information", e);
         }
     };
 

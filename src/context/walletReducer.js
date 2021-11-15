@@ -1,4 +1,13 @@
-import { CONNECT_WALLET, GET_ACCOUNTS, GET_SHORT_ACCOUNTS, WALLET_INSTALLED, GET_CHAIN } from './walletActions';
+import {
+    CONNECT_WALLET,
+    GET_ACCOUNTS,
+    GET_SHORT_ACCOUNTS,
+    WALLET_INSTALLED,
+    GET_CURENT_CHAIN,
+    GET_CONFIGURED_CHAIN,
+    GET_CURENT_NETWORK,
+    GET_CONFIGURED_NETWORK
+    } from './walletActions';
 
 export const walletReducer = (state, action) => {
     switch (action.type) {
@@ -22,10 +31,25 @@ export const walletReducer = (state, action) => {
                 ...state,
                 currentShortAccount: action.payload,
             }
-        case GET_CHAIN:
+        case GET_CURENT_CHAIN:
             return {
                 ...state,
                 currentChain: action.payload,
+            }
+        case GET_CONFIGURED_CHAIN:
+            return {
+                ...state,
+                configuredChain: action.payload,
+            }
+        case GET_CURENT_NETWORK:
+            return {
+                ...state,
+                currentNetwork: action.payload,
+            }
+        case GET_CONFIGURED_NETWORK:
+            return {
+                ...state,
+                configuredNetwork: action.payload,
             }
         default:
             return state;

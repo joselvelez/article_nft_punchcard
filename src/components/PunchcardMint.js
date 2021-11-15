@@ -6,14 +6,24 @@ import { WalletContext } from '../context/WalletContext';
 import { PunchcardMinted } from './PunchcardMinted';
 
 export const PunchcardMint = () => {
-  const watlletContext = useContext(WalletContext);
+  const walletContext = useContext(WalletContext);
   const [currentPrice, setCurrentPrice] = useState(null);
   const [hasPunchcard, setHasPunchcard] = useState(null);
+  const currentChain = walletContext.state.currentChain;
 
   useEffect(() => {
+    let mounted = true;
+
+    if (mounted) {
       loadCurrentPrice();
-      checkPunchcard(watlletContext.state.currentAccount);
-  }, [watlletContext.state.currentAccount]);
+      checkPunchcard(walletContext.state.currentAccount);
+    }
+
+    return function cleanup() {
+      mounted = false;
+    }
+
+  }, [walletContext.state.currentAccount]);
 
   const loadCurrentPrice = async () => {
       const _currentPrice = await getCurrentPrice();
@@ -91,7 +101,7 @@ export const PunchcardMint = () => {
                 </div>
               </div>
               <div className="py-8 px-6 text-center bg-gray-50 lg:flex-shrink-0 lg:flex lg:flex-col lg:justify-center lg:p-12">
-                {hasPunchcard ? <PunchcardMinted /> : <PunchcardMintBtn currentPrice={currentPrice} mintPunchcard={mintPunchcard} />}
+                {hasPunchcard ? <PunchcardMinted /> : <PunchcardMintBtn currentPrice={currentPrice} mintPunchcard={mintPunchcard} currentChain={currentChain} />}
               </div>
             </div>
           </div>

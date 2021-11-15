@@ -78,8 +78,10 @@ export const mintPunchcard = async (_qty, _price) => {
     try {
         let _signer = getContractSigner();
         await _signer.purchasePunchcard(_qty, {value: _price});
+        return true;
     } catch (e) {
         console.log("Unable to purchase a punchcard");
+        return false;
     }
 }
 
