@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router";
 import { fetchArticle } from "../utils/fetchArticle";
 import { WalletContext } from '../context/WalletContext';
-import { checkAccessToArticle, getContractProvider } from "../contracts/contractAPI";
+import { checkAccessToArticle } from "../contracts/contractAPI";
 import { NoArticleAccess } from "./NoArticleAccess";
 import { ArticleContent } from "./ArticleContent";
 import { NoArticleAccessWrongChain } from "./NoArticleAccessWrongChain";
@@ -55,25 +55,6 @@ export const Article = () => {
             mounted = false;
         }
     }, [walletContext.state.currentAccount, walletContext.state.correctNetwork, walletContext.state.accountConnected, articleId, isProcessing]);
-
-    useEffect(() => {
-        let mounted = true;
-
-        if (walletContext.state.walletInstalled) {
-            const provider = getContractProvider();
-    
-            provider.on('PunchcardUsed', (address, article) => {
-                if (mounted) {
-                    console.log("purchased");
-                    setIsProcessing(false);
-                }
-            })
-        }
-
-        return function cleanup() {
-            mounted = false;
-        }
-    }, [walletContext.state.walletInstalled]);
 
     async function loadArticle(_id) {
         try {

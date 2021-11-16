@@ -1,7 +1,27 @@
-import { purchaseArticle } from "../contracts/contractAPI";
+import { useContext, useEffect } from "react";
+import { WalletContext } from "../context/WalletContext";
+import { getContractProvider, purchaseArticle } from "../contracts/contractAPI";
 import loadingIndicator from '../data/loadingIndicator.gif';
 
 export const PurchaseArticle = ({ articleId, isProcessing, setIsProcessing }) => {
+    const walletContext = useContext(WalletContext);
+
+    useEffect(() => {
+        let mounted = true;
+
+        const provider = getContractProvider();
+
+        provider.on('PunchcardUsed', (address, article) => {
+            if (mounted) {
+                console.log("purchased");
+                setIsProcessing(false);
+            }
+        })
+
+        return function cleanup() {
+            mounted = false;
+        }
+    }, [walletContext.state.walletInstalled]);
 
     async function handlePurchase() {
         setIsProcessing(true);
