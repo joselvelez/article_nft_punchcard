@@ -30,7 +30,7 @@ export const checkForPunchcard = async (_address) => {
         let result = await _provider.hasPunchcard(_address);
         return result;
     } catch (e) {
-        console.log("Unable to get punchcard");
+        console.log("Unable to check for a punchcard");
     }
 }
 
@@ -54,6 +54,7 @@ export const getCurrentPrice = async () => {
     }
 }
 
+// Get punchcard token for current address
 export const fetchTokenId = async (_address) => {
     try {
         let _provider = getContractProvider();

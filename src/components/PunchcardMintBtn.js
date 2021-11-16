@@ -1,25 +1,16 @@
-import { useState } from "react";
-import { configuredChain } from "../constants/networks";
+import { useContext } from "react";
+import { WalletContext } from "../context/WalletContext";
 import { defaultPunchcardAmount } from "../constants/contractConstants";
+import { WrongChain } from "./WrongChain";
+import { mintPunchcard } from "../contracts/contractAPI";
 
-export const PunchcardMintBtn = ({ mintPunchcard, currentPrice, currentNetwork, currentChain, configuredNetwork }) => {
-    const [isMinting, setIsMinting] = useState(true);
+export const PunchcardMintBtn = ({ currentPrice, setIsMinting, isMinting }) => {
+    const walletContext = useContext(WalletContext);
 
     async function handleMint(_qty, _price) {
+        setIsMinting(true);
         try {
-            setIsMinting(true);
-            try {
-                const _result = mintPunchcard(_qty, _price);
-                if (_result) {
-                    setIsMinting(false);
-                    // do a notification
-                } else {
-                    setIsMinting(false);
-                }
-            } catch (e) {
-                console.log(e);
-                setIsMinting(false);
-            }
+            await mintPunchcard(_qty, _price);
         } catch (e) {
             console.log(e);
             setIsMinting(false);
@@ -29,10 +20,10 @@ export const PunchcardMintBtn = ({ mintPunchcard, currentPrice, currentNetwork, 
     return (
         <>
             {
-                currentChain === configuredChain ?
+                walletContext.state.currentChain === walletContext.state.configuredChain ?
                     <>
                         {
-                            isMinting ? 
+                            isMinting ? <img src="./images/loadingindicator.gif" alt="loading" className="sm:h-32 md:h-48" /> : 
                             <>
                                 <p className="text-lg leading-6 font-medium text-gray-900">Mint a Punchcard*</p>
                                 <p className="text-lg leading-6 font-medium text-gray-900">Pay once, own it forever</p>
@@ -52,17 +43,9 @@ export const PunchcardMintBtn = ({ mintPunchcard, currentPrice, currentNetwork, 
                                     </div>
                                 </div>
                                 <p className="text-sm p-3">* Comes with {defaultPunchcardAmount} punches</p>
-                            </> :
-                            <img src="./images/loadingindicator.gif" alt="loading" />
+                            </>
                         }
-                    </> :
-                    <div>
-                        <p className="font-bold text-sm text-red-800">Currently on the</p>
-                        <p className="font-bold text-sm text-red-800"></p>
-                        <br />
-                        <p className="font-bold text-sm text-red-800">Connect to the</p>
-                        <p className="font-bold text-sm text-red-800"> network</p>
-                    </div>
+                    </> : <WrongChain />
             }
         </>
     )

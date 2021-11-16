@@ -6,7 +6,9 @@ import {
     GET_CURENT_CHAIN,
     GET_CONFIGURED_CHAIN,
     GET_CURENT_NETWORK,
-    GET_CONFIGURED_NETWORK
+    GET_CONFIGURED_NETWORK,
+    CORRECT_NETWORK,
+    ACCOUNT_CONNECTED
     } from './walletActions';
 
 export const walletReducer = (state, action) => {
@@ -50,6 +52,16 @@ export const walletReducer = (state, action) => {
             return {
                 ...state,
                 configuredNetwork: action.payload,
+            }
+        case CORRECT_NETWORK:
+            return {
+                ...state,
+                correctNetwork: action.payload,
+            }
+        case ACCOUNT_CONNECTED:
+            return {
+                ...state,
+                accountConnected: action.payload,
             }
         default:
             return state;

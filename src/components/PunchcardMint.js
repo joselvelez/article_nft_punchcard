@@ -1,6 +1,6 @@
 import { CheckCircleIcon } from '@heroicons/react/solid';
 import { useContext, useEffect, useState } from "react"
-import { getCurrentPrice, mintPunchcard, checkForPunchcard } from "../contracts/contractAPI";
+import { getCurrentPrice, checkForPunchcard, getContractProvider } from "../contracts/contractAPI";
 import { PunchcardMintBtn } from './PunchcardMintBtn';
 import { WalletContext } from '../context/WalletContext';
 import { PunchcardMinted } from './PunchcardMinted';
@@ -9,13 +9,12 @@ export const PunchcardMint = () => {
   const walletContext = useContext(WalletContext);
   const [currentPrice, setCurrentPrice] = useState(null);
   const [hasPunchcard, setHasPunchcard] = useState(null);
-  const currentChain = walletContext.state.currentChain;
+  const [isMinting, setIsMinting] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
-    if (mounted) {
-      loadCurrentPrice();
+    if (mounted && walletContext.state.correctNetwork) {
       checkPunchcard(walletContext.state.currentAccount);
     }
 
@@ -23,20 +22,54 @@ export const PunchcardMint = () => {
       mounted = false;
     }
 
-  }, [walletContext.state.currentAccount]);
+  }, [walletContext.state.currentAccount, walletContext.state.correctNetwork]);
 
-  const loadCurrentPrice = async () => {
-      const _currentPrice = await getCurrentPrice();
-      setCurrentPrice(_currentPrice);
-  }
+  useEffect(() => {
+    let mounted = true;
+
+    if (mounted && walletContext.state.correctNetwork) {
+        loadCurrentPrice();
+    }
+
+    return function cleanup() {
+      mounted = false;
+    }
+
+  }, [walletContext.state.correctNetwork]);
+
+  useEffect(() => {
+    const provider = getContractProvider();
+    let mounted = true;
+
+    provider.on('PunchcardMinted', (address, token) => {
+      if (mounted) {
+        loadCurrentPrice();
+        checkPunchcard(walletContext.state.currentAccount);
+        setIsMinting(false);
+      }
+    }, []);
+
+    return function cleanup() {
+      mounted = false;
+    }
+  }, [walletContext.state.currentAccount, isMinting]);
 
   const checkPunchcard = async (_address) => {
-      try {
-          const _result = await checkForPunchcard(_address);
-          setHasPunchcard(_result);
-      } catch (e) {
-          console.log("Unable to get balance");
-      }
+    try {
+        const _result = await checkForPunchcard(_address);
+        setHasPunchcard(_result);
+    } catch (e) {
+        console.log("Unable to get balance");
+    }
+  }
+
+  const loadCurrentPrice = async () => {
+    try {
+      const _currentPrice = await getCurrentPrice();
+      setCurrentPrice(_currentPrice);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   return (
@@ -101,7 +134,7 @@ export const PunchcardMint = () => {
                 </div>
               </div>
               <div className="py-8 px-6 text-center bg-gray-50 lg:flex-shrink-0 lg:flex lg:flex-col lg:justify-center lg:p-12">
-                {hasPunchcard ? <PunchcardMinted /> : <PunchcardMintBtn currentPrice={currentPrice} mintPunchcard={mintPunchcard} currentChain={currentChain} />}
+                {hasPunchcard && walletContext.state.correctNetwork ? <PunchcardMinted /> : <PunchcardMintBtn currentPrice={currentPrice} setIsMinting={setIsMinting} isMinting={isMinting} />}
               </div>
             </div>
           </div>

@@ -6,7 +6,6 @@ import { Article } from "./Article";
 import { PunchcardMint } from "./PunchcardMint";
 import WalletProvider from "../context/WalletProvider";
 import { PunchcardRefill } from "./PunchcardRefill";
-import { InstallMetaMask } from "./InstallMetaMask";
 
 function App() {
 
@@ -19,8 +18,8 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="mint" element={<PunchcardMint />} />
             <Route path="refill" element={<PunchcardRefill />} />
-            <Route path="install-wallet" element={<InstallMetaMask />} />
             <Route path="article/:articleId" element={<Article />} />
+            <Route path="*" element={<Content />} />
           </Route>
         </Routes>
       </BrowserRouter>

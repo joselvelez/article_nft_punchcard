@@ -1,7 +1,17 @@
 import { useReducer, useEffect } from "react";
 import { shortenAddress } from "../constants/contractConstants";
 import { configuredChain, networks } from "../constants/networks";
-import { GET_ACCOUNTS, GET_SHORT_ACCOUNTS, GET_CURENT_CHAIN, WALLET_INSTALLED, GET_CONFIGURED_CHAIN, GET_CURENT_NETWORK, GET_CONFIGURED_NETWORK } from "./walletActions";
+import {
+    GET_ACCOUNTS,
+    GET_SHORT_ACCOUNTS,
+    GET_CURENT_CHAIN,
+    WALLET_INSTALLED,
+    GET_CONFIGURED_CHAIN,
+    GET_CURENT_NETWORK,
+    GET_CONFIGURED_NETWORK,
+    CORRECT_NETWORK,
+    ACCOUNT_CONNECTED
+    } from "./walletActions";
 import { fetchAccounts, fetchChain } from "./walletAPI";
 import { WalletContext } from "./WalletContext";
 import { walletReducer } from "./walletReducer";
@@ -16,6 +26,8 @@ const WalletProvider = ({ children }) => {
         configuredChain: null,
         currentNetwork: null,
         configuredNetwork: null,
+        correctNetwork: null,
+        accountConnected: null,
     }
     const [state, dispatch] = useReducer(walletReducer, initialState);
 
@@ -39,6 +51,7 @@ const WalletProvider = ({ children }) => {
             getConfiguredChain();
             getCurrentNetwork();
             getConfiguredNetwork();
+            checkForCorrectNetwork();
             getAccount();
             getShortAccount();
         }
@@ -73,8 +86,18 @@ const WalletProvider = ({ children }) => {
                     type: GET_ACCOUNTS,
                     payload: _account,
                 });
+
+                dispatch({
+                    type: ACCOUNT_CONNECTED,
+                    payload: true,
+                });
             } else {
                 console.log("No authorized account found");
+
+                dispatch({
+                    type: ACCOUNT_CONNECTED,
+                    payload: false,
+                });
             }
         } catch (e) {
             console.log("Unable to fetch account");
@@ -94,8 +117,6 @@ const WalletProvider = ({ children }) => {
                     type: GET_SHORT_ACCOUNTS,
                     payload: _shortenedAccount,
                 });
-            } else {
-                console.log("No authorized account found");
             }
         } catch (e) {
             console.log("Unable to fetch account");
@@ -136,10 +157,11 @@ const WalletProvider = ({ children }) => {
         try {
             const _currentChain = await fetchChain();
             const _currentNetwork = networks.find(i => i.hex === _currentChain)
+            const _currentNetworkName = _currentNetwork.name;
 
             dispatch({
                 type: GET_CURENT_NETWORK,
-                payload: _currentNetwork,
+                payload: _currentNetworkName,
             });
         } catch (e) {
             console.log("Unable to get current network information", e);
@@ -150,11 +172,34 @@ const WalletProvider = ({ children }) => {
     const getConfiguredNetwork = async () => {
         try {
             const _configuredChain = configuredChain;
-            const _configuredNetwork = networks.find(i => i.hex === _configuredChain)
+            const _configuredNetwork = networks.find(i => i.hex === _configuredChain);
+            const _configuredNetworkName = _configuredNetwork.name;
 
             dispatch({
                 type: GET_CONFIGURED_NETWORK,
-                payload: _configuredNetwork,
+                payload: _configuredNetworkName,
+            });
+        } catch (e) {
+            console.log("Unable to get configured network information", e);
+        }
+    };
+
+    // dispatch method to check for correct network
+    const checkForCorrectNetwork = async () => {
+        try {
+            const _configuredChain = configuredChain;
+            const _currentChain = await fetchChain();
+            let _correctNetwork;
+
+            if (_configuredChain === _currentChain) {
+                _correctNetwork = true;
+            } else {
+                _correctNetwork = false;
+            }
+
+            dispatch({
+                type: CORRECT_NETWORK,
+                payload: _correctNetwork,
             });
         } catch (e) {
             console.log("Unable to get configured network information", e);

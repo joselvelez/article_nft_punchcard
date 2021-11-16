@@ -1,5 +1,5 @@
 import abi from '../contracts/ArticlePunchcard.json';
-export const contractAddress = '0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6'
+export const contractAddress = '0x476CeC23b27a1AdBA216176122800D5B75223Bcf'
 export const contractABI = abi.abi;
 
 export function shortenAddress(address) {

@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from "react";
-import { fetchTokenId, getBalance, getCurrentPrice, checkForPunchcard } from "../contracts/contractAPI";
+import { fetchTokenId, getBalance, getCurrentPrice, checkForPunchcard, getContractProvider } from "../contracts/contractAPI";
 import { WalletContext } from "../context/WalletContext";
 import { PunchcardRefillBtn } from "./PunchcardRefillBtn";
 import { NeedPunchcard } from "./NeedPunchcard";
+import { WrongChain } from "./WrongChain";
 
 export const PunchcardRefill = () => {
     const walletContext = useContext(WalletContext);
@@ -10,23 +11,44 @@ export const PunchcardRefill = () => {
     const [currentPrice, setCurrentPrice] = useState(null);
     const [tokenId, setTokenId] = useState(null);
     const [hasPunchcard, setHasPunchcard] = useState(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
         let mounted = true;
         
-        if (mounted) {
+        if (mounted && walletContext.state.correctNetwork) {
             loadBalance(tokenId);            
         }
 
         return function cleanup() {
             mounted = false;
         }
-    }, [tokenId]);
+    }, [tokenId, walletContext.state.correctNetwork]);
 
     useEffect(() => {
-      checkPunchcard(walletContext.state.currentAccount);
-      loadTokenId(walletContext.state.currentAccount);
-      loadCurrentPrice();
+      if (walletContext.state.correctNetwork) {
+        checkPunchcard(walletContext.state.currentAccount);
+        loadTokenId(walletContext.state.currentAccount);
+        loadCurrentPrice();
+      }
+    }, [walletContext.state.currentAccount, walletContext.state.correctNetwork]);
+
+    useEffect(() => {
+      const provider = getContractProvider();
+      let mounted = true;
+      
+      provider.on('PunchcardRefilled', (address, qty, tokenId) => {
+        if (mounted) {
+          checkPunchcard(walletContext.state.currentAccount);
+          loadTokenId(walletContext.state.currentAccount);
+          loadCurrentPrice();
+          setIsProcessing(false);
+        }
+      });
+
+      return function cleanup() {
+        mounted = false;
+      }
     }, [walletContext.state.currentAccount]);
 
     const checkPunchcard = async (_address) => {
@@ -87,7 +109,15 @@ export const PunchcardRefill = () => {
                 </div>
               </div>
               <div className="py-8 px-6 text-center bg-gray-50 lg:flex-shrink-0 lg:flex lg:flex-col lg:justify-center lg:p-12">
-                {hasPunchcard ? <PunchcardRefillBtn currentPrice={currentPrice} tokenId={tokenId} /> : <NeedPunchcard />}
+                {(() => {
+                  if (hasPunchcard && walletContext.state.correctNetwork) {
+                    return <PunchcardRefillBtn currentPrice={currentPrice} tokenId={tokenId} isProcessing={isProcessing} setIsProcessing={setIsProcessing} />
+                  } else if (walletContext.state.correctNetwork === false) {
+                    return <WrongChain />
+                  } else if (hasPunchcard === false && walletContext.state.correctNetwork) {
+                    return <NeedPunchcard />
+                  }
+                })()}
               </div>
             </div>
           </div>
@@ -96,4 +126,3 @@ export const PunchcardRefill = () => {
     </div>
   )
 }
-

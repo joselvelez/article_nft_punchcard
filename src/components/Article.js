@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router";
 import { fetchArticle } from "../utils/fetchArticle";
 import { WalletContext } from '../context/WalletContext';
-import { useContext } from "react";
-import { checkAccessToArticle } from "../contracts/contractAPI";
+import { checkAccessToArticle, getContractProvider } from "../contracts/contractAPI";
 import { NoArticleAccess } from "./NoArticleAccess";
 import { ArticleContent } from "./ArticleContent";
+import { NoArticleAccessWrongChain } from "./NoArticleAccessWrongChain";
+import { NoArticleAccessNotConnected } from "./NoArticleAccessNotConnected";
 
 export const Article = () => {
     const walletContext = useContext(WalletContext);
     const { articleId } = useParams();
-    const [hasAccess, setHasAccess] = useState(null);
+    const [hasAccess, setHasAccess] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
     const [article, setArticle] = useState({
         id: null,
         title: null,
@@ -19,22 +21,23 @@ export const Article = () => {
         content: null
     });
 
+    // Fetch the article and save to state
     useEffect(() => {
         const _articleId = articleId;
+        let mounted = true;
 
-        async function loadArticle(_id) {
-            try {
-                const _article = await fetchArticle(_id);
-                setArticle(_article);
-            } catch (e) {
-                console.log(e);
-            }
+        if (mounted) {
+            loadArticle(_articleId);
         }
 
-        loadArticle(_articleId);
-    }, [articleId]);
+        return function cleanup() {
+            mounted = false;
+        }
+    }, [articleId, isProcessing]);
 
     useEffect(() => {
+        let mounted = true;
+        
         async function checkAccess(_address, _tokenId) {
             try {
                 const _hasAccess = await checkAccessToArticle(_address, _tokenId);
@@ -44,12 +47,53 @@ export const Article = () => {
             }
         }
 
-        checkAccess(walletContext.state.currentAccount, articleId);
-    }, [walletContext.state.currentAccount, articleId]);
+        if (mounted && walletContext.state.correctNetwork && walletContext.state.accountConnected) {
+            checkAccess(walletContext.state.currentAccount, articleId);
+        }
+
+        return function cleanup() {
+            mounted = false;
+        }
+    }, [walletContext.state.currentAccount, walletContext.state.correctNetwork, walletContext.state.accountConnected, articleId, isProcessing]);
+
+    useEffect(() => {
+        const provider = getContractProvider();
+        let mounted = true;
+
+        provider.on('PunchcardUsed', (address, article) => {
+            if (mounted) {
+                console.log("purchased");
+                setIsProcessing(false);
+            }
+        })
+
+        return function cleanup() {
+            mounted = false;
+        }
+    }, []);
+
+    async function loadArticle(_id) {
+        try {
+            const _article = await fetchArticle(_id);
+            setArticle(_article);
+        } catch (e) {
+            console.log(e);
+        }
+    }
 
     return (
         <div>
-            {hasAccess ? <ArticleContent article={article} /> : <NoArticleAccess articleId={articleId} />}
+            {(() => {
+                if (hasAccess && walletContext.state.correctNetwork) {
+                    return <ArticleContent article={article} />
+                } else if (walletContext.state.correctNetwork === false) {
+                    return <NoArticleAccessWrongChain />
+                } else if (hasAccess === false && walletContext.state.correctNetwork && walletContext.state.accountConnected) {
+                    return <NoArticleAccess articleId={articleId} isProcessing={isProcessing} setIsProcessing={setIsProcessing} />
+                } else if (hasAccess === false && walletContext.state.correctNetwork && walletContext.state.accountConnected === false) {
+                    return <NoArticleAccessNotConnected />
+                }
+            })()}
         </div>
     )
 }

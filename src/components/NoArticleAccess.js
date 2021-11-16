@@ -2,8 +2,9 @@ import { useContext, useState, useEffect } from "react"
 import { WalletContext } from "../context/WalletContext"
 import { PurchaseArticle } from "./PurchaseArticle";
 import { fetchTokenId, getBalance, checkForPunchcard } from "../contracts/contractAPI";
+import { NeedPunchcard } from "./NeedPunchcard";
 
-export const NoArticleAccess = ({ articleId }) => {
+export const NoArticleAccess = ({ articleId, setIsProcessing, isProcessing }) => {
     const walletContext = useContext(WalletContext);
     const [currentBalance, setCurrentBalance] = useState(null);
     const [tokenId, setTokenId] = useState(null);
@@ -12,19 +13,38 @@ export const NoArticleAccess = ({ articleId }) => {
     useEffect(() => {
         let mounted = true;
         
-        if (mounted) {
-            loadBalance(tokenId);            
+        if (mounted && walletContext.state.correctNetwork) {
+            checkPunchcard(walletContext.state.currentAccount);
         }
 
         return function cleanup() {
             mounted = false;
         }
-    }, [tokenId]);
+    }, [walletContext.state.correctNetwork, walletContext.state.currentAccount]);
 
     useEffect(() => {
-        checkPunchcard(walletContext.state.currentAccount);
-        loadTokenId(walletContext.state.currentAccount);
-    }, [walletContext.state.currentAccount]);
+        let mounted = true;
+        
+        if (mounted && walletContext.state.correctNetwork) {
+            loadBalance(tokenId);
+        }
+
+        return function cleanup() {
+            mounted = false;
+        }
+    }, [tokenId, walletContext.state.correctNetwork]);
+
+    useEffect(() => {
+        let mounted = true;
+        
+        if (mounted && walletContext.state.correctNetwork) {
+            loadTokenId(walletContext.state.currentAccount);
+        }
+
+        return function cleanup() {
+            mounted = false;
+        }
+    }, [walletContext.state.correctNetwork, walletContext.state.currentAccount]);
 
     const checkPunchcard = async (_address) => {
         try {
@@ -79,7 +99,7 @@ export const NoArticleAccess = ({ articleId }) => {
                     </div>
                 </div>
                 <div className="py-8 px-6 text-center bg-gray-50 lg:flex-shrink-0 lg:flex lg:flex-col lg:justify-center lg:p-12">
-                    <PurchaseArticle articleId={articleId} />
+                    {hasPunchcard ? <PurchaseArticle articleId={articleId} isProcessing={isProcessing} setIsProcessing={setIsProcessing} /> : <NeedPunchcard />}
                 </div>
                 </div>
             </div>

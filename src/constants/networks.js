@@ -1,5 +1,5 @@
-// export const configuredChain = "0x4"; // Rinkeby Testnet
-export const configuredChain = "0x7a69"; // Locahost, Hardhat 31337
+export const configuredChain = "0x4"; // Rinkeby Testnet
+// export const configuredChain = "0x7a69"; // Locahost, Hardhat 31337
 
 export const networks = [
     {
