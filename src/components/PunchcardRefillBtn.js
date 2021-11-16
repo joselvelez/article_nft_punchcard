@@ -1,3 +1,4 @@
+import loadingIndicator from '../data/loadingIndicator.gif';
 import { defaultPunchcardAmount } from "../constants/contractConstants";
 import { refillPunchcard } from "../contracts/contractAPI";
 
@@ -13,7 +14,7 @@ export const PunchcardRefillBtn = ({ currentPrice, tokenId, isProcessing, setIsP
         }
     }
     
-    return ( isProcessing ? <img src="../images/loadingindicator.gif" alt="loading" className="sm:h-32 md:h-48" /> :
+    return ( isProcessing ? <img src={loadingIndicator} alt="loading" className="sm:h-32 md:h-48" /> :
         <>
             <p className="text-lg leading-6 font-medium text-gray-900">Refill your punchcard*</p>
             <div className="mt-4 flex items-center justify-center text-4xl font-extrabold text-gray-900">

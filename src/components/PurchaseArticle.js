@@ -1,4 +1,5 @@
 import { purchaseArticle } from "../contracts/contractAPI";
+import loadingIndicator from '../data/loadingIndicator.gif';
 
 export const PurchaseArticle = ({ articleId, isProcessing, setIsProcessing }) => {
 
@@ -12,7 +13,7 @@ export const PurchaseArticle = ({ articleId, isProcessing, setIsProcessing }) =>
     }
 
     return (
-        isProcessing ? <img src="../../images/loadingindicator.gif" alt="loading" className="sm:h-32 md:h-48" /> :
+        isProcessing ? <img src={loadingIndicator} alt="loading" className="sm:h-32 md:h-48" /> :
             <>
                 <p className="text-lg leading-6 font-medium text-gray-900">Pay once, own it forever</p>
                 <div className="mt-4 flex items-center justify-center text-4xl font-extrabold text-gray-900">
