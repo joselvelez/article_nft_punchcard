@@ -10,7 +10,10 @@ export const PunchcardMintBtn = ({ currentPrice, setIsMinting, isMinting }) => {
     async function handleMint(_qty, _price) {
         setIsMinting(true);
         try {
-            await mintPunchcard(_qty, _price);
+            const result = await mintPunchcard(_qty, _price);
+            if (result === false) {
+                setIsMinting(false);
+            }
         } catch (e) {
             console.log(e);
             setIsMinting(false);

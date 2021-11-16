@@ -99,7 +99,9 @@ export const purchaseArticle = async (_articleId) => {
     try {
         let _signer = getContractSigner();
         await _signer.assignAccessToArticle(_articleId);
+        return true;
     } catch (e) {
         console.log("Unable to purchase a punchcard");
+        return false;
     }
 }
