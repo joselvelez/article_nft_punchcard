@@ -92,6 +92,8 @@ export const Article = () => {
                     return <NoArticleAccess articleId={articleId} isProcessing={isProcessing} setIsProcessing={setIsProcessing} />
                 } else if (hasAccess === false && walletContext.state.correctNetwork && walletContext.state.accountConnected === false) {
                     return <NoArticleAccessNotConnected />
+                } else {
+                    return <NoArticleAccessNotConnected />
                 }
             })()}
         </div>
