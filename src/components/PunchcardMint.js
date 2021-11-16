@@ -47,7 +47,7 @@ export const PunchcardMint = () => {
         checkPunchcard(walletContext.state.currentAccount);
         setIsMinting(false);
       }
-    }, []);
+    }, [isMinting]);
 
     return function cleanup() {
       mounted = false;

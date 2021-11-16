@@ -34,10 +34,10 @@ export const checkForPunchcard = async (_address) => {
     }
 }
 
-export const getBalance = async () => {
+export const getBalance = async (_tokenId) => {
     try {
         let _provider = getContractProvider();
-        let _balance = await _provider.getBalance(1);
+        let _balance = await _provider.getBalance(_tokenId);
         return _balance;
     } catch (e) {
         console.log("Unable to get balance");
