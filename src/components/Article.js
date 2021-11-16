@@ -57,20 +57,23 @@ export const Article = () => {
     }, [walletContext.state.currentAccount, walletContext.state.correctNetwork, walletContext.state.accountConnected, articleId, isProcessing]);
 
     useEffect(() => {
-        const provider = getContractProvider();
         let mounted = true;
 
-        provider.on('PunchcardUsed', (address, article) => {
-            if (mounted) {
-                console.log("purchased");
-                setIsProcessing(false);
-            }
-        })
+        if (walletContext.state.walletInstalled) {
+            const provider = getContractProvider();
+    
+            provider.on('PunchcardUsed', (address, article) => {
+                if (mounted) {
+                    console.log("purchased");
+                    setIsProcessing(false);
+                }
+            })
+        }
 
         return function cleanup() {
             mounted = false;
         }
-    }, []);
+    }, [walletContext.state.walletInstalled]);
 
     async function loadArticle(_id) {
         try {
@@ -91,8 +94,6 @@ export const Article = () => {
                 } else if (hasAccess === false && walletContext.state.correctNetwork && walletContext.state.accountConnected) {
                     return <NoArticleAccess articleId={articleId} isProcessing={isProcessing} setIsProcessing={setIsProcessing} />
                 } else if (hasAccess === false && walletContext.state.correctNetwork && walletContext.state.accountConnected === false) {
-                    return <NoArticleAccessNotConnected />
-                } else if (walletContext.state.walletInstalled === false) {
                     return <NoArticleAccessNotConnected />
                 }
             })()}
