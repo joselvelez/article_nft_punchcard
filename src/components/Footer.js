@@ -9,7 +9,7 @@ export const Footer = () => {
                 </a>
             </div>
             <div>
-                Contract: <a  href="https://github.com/joselvelez/article_nft_punchcard"
+                Contract: <a  href="https://github.com/joselvelez/article_nft_punchcard_contract"
                 className="text-indigo-400 hover:text-indigo-500 transition ease-in-out duration-150" target="_blank" rel="noreferrer"
                 >
                     GitHub Repo
