@@ -90,8 +90,10 @@ export const refillPunchcard = async (_qty, _price, _tokenId) => {
     try {
         let _signer = getContractSigner();
         await _signer.addRedemptions(_qty, _tokenId, {value: (_price * _qty)});
+        return true;
     } catch (e) {
         console.log("Unable to purchase a punchcard");
+        return false;
     }
 }
 

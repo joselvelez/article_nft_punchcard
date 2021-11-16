@@ -3,6 +3,7 @@ import { WalletContext } from "../context/WalletContext";
 import { defaultPunchcardAmount } from "../constants/contractConstants";
 import { WrongChain } from "./WrongChain";
 import { mintPunchcard } from "../contracts/contractAPI";
+import loadingIndicator from '../data/loadingIndicator.gif';
 
 export const PunchcardMintBtn = ({ currentPrice, setIsMinting, isMinting }) => {
     const walletContext = useContext(WalletContext);
@@ -26,7 +27,7 @@ export const PunchcardMintBtn = ({ currentPrice, setIsMinting, isMinting }) => {
                 walletContext.state.currentChain === walletContext.state.configuredChain ?
                     <>
                         {
-                            isMinting ? <img src="/images/loadingIndicator.gif" alt="loading" className="sm:h-32 md:h-48" /> : 
+                            isMinting ? <img src={loadingIndicator} alt="loading" className="sm:h-32 md:h-48" /> : 
                             <>
                                 <p className="text-lg leading-6 font-medium text-gray-900">Mint a Punchcard*</p>
                                 <p className="text-lg leading-6 font-medium text-gray-900">Pay once, own it forever</p>

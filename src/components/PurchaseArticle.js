@@ -6,9 +6,13 @@ export const PurchaseArticle = ({ articleId, isProcessing, setIsProcessing }) =>
     async function handlePurchase() {
         setIsProcessing(true);
         try {
-            await purchaseArticle(articleId);
+            const result = await purchaseArticle(articleId);
+            if (result === false) {
+                setIsProcessing(false);
+            }
         } catch (e) {
             console.log(e);
+            setIsProcessing(false);
         }
     }
 

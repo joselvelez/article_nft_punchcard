@@ -7,7 +7,9 @@ export const PunchcardRefillBtn = ({ currentPrice, tokenId, isProcessing, setIsP
     async function handleMint(amt, price, token) {
         setIsProcessing(true);
         try {
-            await refillPunchcard(amt, price, token)
+            const result = await refillPunchcard(amt, price, token);
+            if (result === false);
+            setIsProcessing(false);
         } catch (e) {
             console.log(e);
             setIsProcessing(false);
