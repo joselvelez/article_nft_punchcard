@@ -18,6 +18,9 @@ export const About = () => {
                 This is the first web3 application I have built on my own from scratch and I'm very excited to share it. I hope others might find it useful
                 in their learning process. This was built with React and Tailwind CSS. 
             </p>
+            <p className="text-sm text-red-900 pb-2">
+                This application is running on the Rinkeby Testnet. You need to be connected to Rinkeby to access it.
+            </p>
         </div>
     )
 }
