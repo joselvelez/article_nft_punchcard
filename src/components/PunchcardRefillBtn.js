@@ -8,8 +8,9 @@ export const PunchcardRefillBtn = ({ currentPrice, tokenId, isProcessing, setIsP
         setIsProcessing(true);
         try {
             const result = await refillPunchcard(amt, price, token);
-            if (result === false);
-            setIsProcessing(false);
+            if (result === false) {
+                setIsProcessing(false);
+            }
         } catch (e) {
             console.log(e);
             setIsProcessing(false);
